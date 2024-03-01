@@ -28,7 +28,9 @@ public:
 	OpenGLResource& operator=(const OpenGLResource&) = delete;
 
 	// Enable move operations
-	OpenGLResource(OpenGLResource&& other) noexcept : mId(std::exchange(other.mId, 0)) {}
+	OpenGLResource(OpenGLResource&& other) noexcept : mId(std::exchange(other.mId, 0)) {
+		//TOREPARE
+	}
 	OpenGLResource& operator=(OpenGLResource&& other) noexcept {
 		if (this != &other) {
 			mDeleteFunc(mId);

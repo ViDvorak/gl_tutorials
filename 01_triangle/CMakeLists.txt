@@ -5,7 +5,7 @@ project(01_triangle)
 
 add_executable(01_triangle_vanilla vanilla.cpp)
 target_sources(01_triangle_vanilla PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../glad/src/glad.c)
-target_link_libraries(01_triangle_vanilla glfw OpenGL::GL)
+target_link_libraries(01_triangle_vanilla glfw3 OpenGL::GL)
 target_include_directories(01_triangle_vanilla PRIVATE
 	${CMAKE_CURRENT_SOURCE_DIR}/../glad/include
 	${CMAKE_CURRENT_SOURCE_DIR}/../utils
@@ -22,7 +22,7 @@ add_executable(01_triangle
 	../utils/window.hpp
 )
 target_sources(01_triangle PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../glad/src/glad.c)
-target_link_libraries(01_triangle glfw OpenGL::GL)
+target_link_libraries(01_triangle glfw3 OpenGL::GL)
 target_include_directories(01_triangle PRIVATE
 	${CMAKE_CURRENT_SOURCE_DIR}/../glad/include
 	${CMAKE_CURRENT_SOURCE_DIR}/../utils

@@ -17,7 +17,8 @@ find_package(OpenGL REQUIRED)
 # if it's not available as a findable package.
 
 # For GLFW, you can find it via find_package if it's installed
-find_package(glfw3 3.3 REQUIRED)
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../glfw-3.4.bin.WIN64/include")
+link_directories("${CMAKE_CURRENT_SOURCE_DIR}/../glfw-3.4.bin.WIN64/lib-vc2022")
 
 # Add subdirectories here
 add_subdirectory(01_triangle)

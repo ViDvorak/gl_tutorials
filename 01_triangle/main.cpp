@@ -14,7 +14,7 @@
 // Uncomment just one of the following headers
 // to get different variations of the demonstrations.
 
-#include "simpleTriangle.hpp"
+ #include "simpleTriangle.hpp"
 // #include "coloredTriangle.hpp"
 // #include "fractal.hpp"
 
