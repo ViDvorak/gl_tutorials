@@ -1,0 +1,2 @@
+#pragma code_page(65001)
+1 /* CREATEPROCESS_MANIFEST_RESOURCE_ID */ 24 /* RT_MANIFEST */ "C:/Users/Lenovo/OneDrive/Documents/Skola/RTGOG/lab/gl_tutorials/out/build/x64-Debug/01_triangle/CMakeFiles/01_triangle.dir/embed.manifest"
