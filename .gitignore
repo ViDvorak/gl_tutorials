@@ -4,3 +4,10 @@
 
 /.vs
 /out/build/x64-Debug
+# Vim swap files
+*.swp
+*.swo
+*.swn
+*.swm
+*.swl
+*.swk
