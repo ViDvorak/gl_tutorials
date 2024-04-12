@@ -8,6 +8,17 @@
 #include "obj_file_loading.hpp"
 #include "ogl_geometry_construction.hpp"
 
+std::shared_ptr<AGeometry> OGLGeometryFactory::getAxisGizmo() {
+	auto it = mObjects.find("axisGizmo");
+	if (it != mObjects.end()) {
+		return it->second;
+	}
+
+	auto geometry = std::make_shared<OGLGeometry>(generateAxisGizmo());
+	mObjects["axisGizmo"] = geometry;
+	return geometry;
+}
+
 std::shared_ptr<AGeometry> OGLGeometryFactory::getCube() {
 	auto it = mObjects.find("cube");
 	if (it != mObjects.end()) {
@@ -38,6 +49,28 @@ std::shared_ptr<AGeometry> OGLGeometryFactory::getCubeNormTex() {
 
 	auto geometry = std::make_shared<OGLGeometry>(generateCubeBuffersNormTex());
 	mObjects["cubeNormTex"] = geometry;
+	return geometry;
+}
+
+std::shared_ptr<AGeometry> OGLGeometryFactory::getPlane() {
+	auto it = mObjects.find("plane");
+	if (it != mObjects.end()) {
+		return it->second;
+	}
+
+	auto geometry = std::make_shared<OGLGeometry>(generatePlaneBuffers());
+	mObjects["plane"] = geometry;
+	return geometry;
+}
+
+std::shared_ptr<AGeometry> OGLGeometryFactory::getPlaneOutline() {
+	auto it = mObjects.find("planeOutline");
+	if (it != mObjects.end()) {
+		return it->second;
+	}
+
+	auto geometry = std::make_shared<OGLGeometry>(generatePlaneOutlineBuffers());
+	mObjects["getPlaneOutline"] = geometry;
 	return geometry;
 }
 
