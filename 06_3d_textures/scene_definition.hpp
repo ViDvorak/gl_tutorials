@@ -28,7 +28,7 @@ inline SimpleScene createSphereScene(MaterialFactory &aMaterialFactory, Geometry
 
 		cube->setName("CUBE1");
 		// cube->setPosition(glm::vec3(0.75f, 0.0f, 0.0f));
-		cube->setScale(glm::vec3(2.0, 1.0f, 1.0f));
+		// cube->setScale(glm::vec3(2.0f, 1.0f, 1.0f));
 		cube->addMaterial(
 			"raycast",
 			MaterialParameters(
@@ -46,6 +46,32 @@ inline SimpleScene createSphereScene(MaterialFactory &aMaterialFactory, Geometry
 				{}
 				)
 			);
+		cube->prepareRenderData(aMaterialFactory, aGeometryFactory);
+		scene.addObject(cube);
+	}
+	{
+		auto cube = std::make_shared<Cube>();
+
+		cube->setName("CUBE2");
+		// cube->setPosition(glm::vec3(0.75f, 0.0f, 0.0f));
+		cube->setScale(glm::vec3(0.9f, 0.9f, 0.9f));
+		cube->addMaterial(
+			"raycast",
+			MaterialParameters(
+				"solid_color",
+				RenderStyle::Solid,
+				{
+				}
+				)
+		);
+		cube->addMaterial(
+			"wireframe",
+			MaterialParameters(
+				"solid_color",
+				RenderStyle::Wireframe,
+				{}
+			)
+		);
 		cube->prepareRenderData(aMaterialFactory, aGeometryFactory);
 		scene.addObject(cube);
 	}
