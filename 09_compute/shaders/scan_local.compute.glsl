@@ -42,12 +42,15 @@ void main() {
 		}
 	}
 
-	barrier(); // Make sure all additions are finished
+	barrier(); // Make sure all additions in workgroup are finished
 
-	// Write back the results from shared memory to global memory
-	data[global_id] = temp[local_id];
-	// Write the sum of this work group to the auxiliary buffer
-	if (local_id == 255) {
-		aux[gl_WorkGroupID.x] = temp[255];
+	if (aux.size() > 1){
+		// Write back the results from shared memory to global memory
+		data[global_id] = temp[local_id] + aux[gl_WorkGroupID - 1];
+		// Write the sum of this work group to the auxiliary buffer
+		if (local_id == 255) {
+			aux[gl_WorkGroupID.x] = temp[255] + aux[gl_WorkGroupID - 1];
+		}
 	}
+	else
 }

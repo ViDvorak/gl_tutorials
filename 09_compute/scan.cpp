@@ -24,6 +24,7 @@
 
 static int const cWorkGroupSize = 256;
 
+
 void compute() {
 	auto timeQuery = createQuery();
 	// Create compute shader
@@ -67,6 +68,10 @@ void compute() {
 	// *******************************************************
 	// TODO - complete the sum
 	// *******************************************************
+
+	for (int i = 0; i < numWorkGroups; i++) {
+
+	}
 
 	glEndQuery(GL_TIME_ELAPSED);
 	auto end = std::chrono::high_resolution_clock::now();
