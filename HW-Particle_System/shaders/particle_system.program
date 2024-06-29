@@ -1,0 +1,3 @@
+vertex: particle_system
+geometry: particle_system
+fragment: noise_animated
