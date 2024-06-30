@@ -5,6 +5,7 @@
 #include "mesh_object.hpp"
 #include "ogl_geometry_construction.hpp"
 #include "ogl_geometry_factory.hpp"
+#include "ogl_material_factory.hpp"
 
 
 /*
@@ -15,98 +16,20 @@ Recommended approach:
 */
 
 
-
-inline IndexedBuffer generateInstancedParticleSystemBuffers(const std::vector<VertexColor>& aPositionColorAttribs) {
+inline IndexedBuffer generateInstancedParticleSystemBuffers(const std::vector<VertexVelocityInitLife>& aPositionColorAttribs, unsigned int aParticleCount, OpenGLResource&& tfb) {
 	IndexedBuffer buffers{
 		createVertexArray(),
-	};
-
-	buffers.vbos.push_back(createBuffer());
-	buffers.vbos.push_back(createBuffer());
-	buffers.vbos.push_back(createBuffer());
-
-	std::vector<VertexNormTex> vertices;
-	std::vector<unsigned int> indices;
-
-	// Generate vertex data
-	for (int i = 0; i < 3; ++i) {
-		for (int direction = -1; direction < 2; direction += 2) {
-			unsigned indexOffset = unsigned(vertices.size());
-			for (int j = 0; j < 4; ++j) {
-				vertices.push_back(VertexNormTex(
-					insertDimension(unitFaceVertices[j], i, direction * 0.5f), // position
-					insertDimension(glm::vec2(), i, float(direction)), // normal
-					unitFaceVertices[j] + glm::vec2(0.5f, 0.5f))); // texture coordinates
-			}
-		}
-	}
-
-	// Generate indices
-	unsigned int index = 0;
-	for (auto& vertex : vertices) {
-		indices.push_back(index++);
-	}
-
-	// Bind VAO 
-	GL_CHECK(glBindVertexArray(buffers.vao.get()));
-
-	// Bind VBO with vertex data
-	GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, buffers.vbos[0].get()));
-	GL_CHECK(glBufferData(GL_ARRAY_BUFFER, sizeof(VertexNormTex) * vertices.size(), vertices.data(), GL_STATIC_DRAW));
-
-	// Bind EBO
-	GL_CHECK(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers.vbos[1].get()));
-	GL_CHECK(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * indices.size(), indices.data(), GL_STATIC_DRAW));
-
-	// Vertex attributes
-	// Position attribute
-	GL_CHECK(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexNormTex), (void*)0));
-	GL_CHECK(glEnableVertexAttribArray(0));
-
-	// Normal attribute
-	GL_CHECK(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexNormTex), (void*)(sizeof(glm::vec3))));
-	GL_CHECK(glEnableVertexAttribArray(1));
-
-	// Texture coordinate attribute
-	GL_CHECK(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(VertexNormTex), (void*)(2 * sizeof(glm::vec3))));
-	GL_CHECK(glEnableVertexAttribArray(2));
-
-	// Instance attributes
-	GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, buffers.vbos[2].get()));
-	GL_CHECK(glBufferData(GL_ARRAY_BUFFER, sizeof(VertexColor) * aPositionColorAttribs.size(), aPositionColorAttribs.data(), GL_STATIC_DRAW));
-
-	// Instance position attribute
-	GL_CHECK(glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(VertexColor), (void*)(0)));
-	GL_CHECK(glEnableVertexAttribArray(3));
-	GL_CHECK(glVertexAttribDivisor(3, 1));
-
-	// Instance color attribute
-	GL_CHECK(glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(VertexColor), (void*)(sizeof(glm::vec3))));
-	GL_CHECK(glEnableVertexAttribArray(4));
-	GL_CHECK(glVertexAttribDivisor(4, 1));
-
-	// Unbind VAO
-	GL_CHECK(glBindVertexArray(0));
-
-	buffers.indexCount = unsigned(indices.size());
-	buffers.instanceCount = unsigned(aPositionColorAttribs.size());
-	buffers.mode = GL_POINTS;
-
-	return buffers;
-}
-
-
-
-
-inline IndexedBuffer OLDgenerateInstancedParticleSystemBuffers(const std::vector<VertexColor>& aPositionColorAttribs) {
-	IndexedBuffer buffers{
-		createVertexArray(),
+		std::move(tfb),
 	};
 	buffers.vbos.push_back(createBuffer());
 	buffers.vbos.push_back(createBuffer());
 	buffers.vbos.push_back(createBuffer());
+	buffers.vbos.push_back(createBuffer());
 
-	std::vector<VertexNormTex> vertices;
+	buffers.isTransformFeedbackLoopEnabled = true;
+
+
+	std::vector<VertexVelocityLife> vertices;
 	std::vector<unsigned int> indices;
 
 	// TODO insted of vertices pass to the VBO only centers of the particles
@@ -114,29 +37,14 @@ inline IndexedBuffer OLDgenerateInstancedParticleSystemBuffers(const std::vector
 	// TODO in geometry shader create vertises plane where normal looks at camera
 	// TODO fragment shader use particle 
 
-	// vertex data to render generation from center points of cubes
-	for (int i = 0; i < 3; ++i) {
-		for (int direction = -1; direction < 2; direction += 2) {
-
-			// VBO data definition
-			unsigned indexOffset = unsigned(vertices.size());
-			for (int j = 0; j < 4; ++j) {
-				vertices.push_back(VertexNormTex(
-					insertDimension(unitFaceVertices[j], i, direction * 0.5f), // position
-					insertDimension(glm::vec2(), i, float(direction)), // normal
-					unitFaceVertices[j] + glm::vec2(0.5f, 0.5f))); // texture coordinates
-			}
-
-			// old EBO data definition
-			/*for (auto index : faceTriangleIndices) {
-				indices.push_back(index + indexOffset);
-			}*/
-		}
+	
+	for (VertexVelocityInitLife vertex : aPositionColorAttribs) {
+		vertices.emplace_back(std::move((VertexVelocityLife)vertex));
 	}
+
 	// new EBO data definition
-	unsigned int index = 0;
-	for (auto vertex : vertices) {
-		indices.push_back(index++);
+	for (unsigned int i = 0; i < aParticleCount; ++i) {
+		indices.push_back(i);
 	}
 
 	// bind VAO 
@@ -144,7 +52,7 @@ inline IndexedBuffer OLDgenerateInstancedParticleSystemBuffers(const std::vector
 
 	// bind VBO with vertex data
 	GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, buffers.vbos[0].get()));
-	GL_CHECK(glBufferData(GL_ARRAY_BUFFER, sizeof(VertexNormTex) * vertices.size(), vertices.data(), GL_STATIC_DRAW));
+	GL_CHECK(glBufferData(GL_ARRAY_BUFFER, sizeof(VertexVelocityLife) * vertices.size(), vertices.data(), GL_STATIC_DRAW)); // TODO change there is data overlap
 
 	// bind EBO
 	GL_CHECK(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers.vbos[1].get()));
@@ -152,39 +60,57 @@ inline IndexedBuffer OLDgenerateInstancedParticleSystemBuffers(const std::vector
 
 
 
-	// Position attribute
-	GL_CHECK(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexNormTex), (void*)0));
+	// asociated with current VBO [1]
+	// current position
+	GL_CHECK(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexVelocityLife), (void*)0));
 	GL_CHECK(glEnableVertexAttribArray(0));
 
-	// Normal attribute
-	GL_CHECK(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexNormTex), (void*)(sizeof(glm::vec3))));
+	// current velocity
+	GL_CHECK(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexVelocityLife), (void*)(sizeof(glm::vec3))));
 	GL_CHECK(glEnableVertexAttribArray(1));
 	
-	// Texture coordinate attribute
-	GL_CHECK(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(VertexNormTex), (void*)(2 * sizeof(glm::vec3)))); // last parameter is offset
+	// elapsed timeOfLife of the particel
+	GL_CHECK(glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(VertexVelocityLife), (void*)(2 * sizeof(glm::vec3)))); // last parameter is offset
 	GL_CHECK(glEnableVertexAttribArray(2));
 
 
 
-	//		glVertexAtribPointer(index, size, type, normalized, stride, pointer)
 
 	// INSTANCE ATTRIBUTES
+	// position and color of each particle
 
-	// that means position and color of each particle
-
+	// Bind VBO
 	GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, buffers.vbos[2].get()));
 	GL_CHECK(glBufferData(GL_ARRAY_BUFFER, sizeof(VertexColor) * aPositionColorAttribs.size(), aPositionColorAttribs.data(), GL_STATIC_DRAW));
 
-	GL_CHECK(glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(VertexColor), (void*)(0))); // vec3 position
+	// initial position
+	GL_CHECK(glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(VertexVelocityInitLife), (void*)(0)));
 	GL_CHECK(glEnableVertexAttribArray(3));
 	GL_CHECK(glVertexAttribDivisor(3, 1)); // 1 means the attribute advances once per instance
 
-	GL_CHECK(glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(VertexColor), (void*)(sizeof(glm::vec3)))); // vec3 color
+	// initial velocity
+	GL_CHECK(glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(VertexVelocityInitLife), (void*)(sizeof(glm::vec3))));
 	GL_CHECK(glEnableVertexAttribArray(4));
 	GL_CHECK(glVertexAttribDivisor(4, 1)); // 1 means the attribute advances once per instance
 
+	// time of a particle life
+	GL_CHECK(glVertexAttribPointer(5, 1, GL_FLOAT, GL_FALSE, sizeof(VertexVelocityInitLife), (void*)(2 * sizeof(glm::vec3))));
+	GL_CHECK(glEnableVertexAttribArray(5));
+	GL_CHECK(glVertexAttribDivisor(5, 1)); // 1 means the attribute advances once per instance
+
+	// initial lifeDelay
+	GL_CHECK(glVertexAttribPointer(6, 1, GL_FLOAT, GL_FALSE, sizeof(VertexVelocityInitLife), (void*)(2 * (sizeof(glm::vec3) + sizeof(float) )) ));
+	GL_CHECK(glEnableVertexAttribArray(6));
+	GL_CHECK(glVertexAttribDivisor(6, 1));
+
 	// Unbind VAO
 	GL_CHECK(glBindVertexArray(0));
+
+
+	// bind transform feedback buffer
+	GL_CHECK(glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, buffers.vbos[3].get()));
+
+
 
 	buffers.indexCount = unsigned(indices.size());
 	buffers.instanceCount = unsigned(aPositionColorAttribs.size());
@@ -195,22 +121,38 @@ inline IndexedBuffer OLDgenerateInstancedParticleSystemBuffers(const std::vector
 
 class InstancedParticleSystem : public MeshObject {
 public:
-	InstancedParticleSystem(std::vector<VertexColor> aInstanceAttributes)
-		: mInstanceAttributes(std::move(aInstanceAttributes))
+	InstancedParticleSystem(std::vector<VertexVelocityInitLife> aInstanceAttributes, unsigned int aParticleCount)
+		: mInstanceAttributes(std::move(aInstanceAttributes)), mParticleCount(aParticleCount)
 	{}
 
 	virtual std::shared_ptr<AGeometry> getGeometry(GeometryFactory& aGeometryFactory, RenderStyle aRenderStyle) {
-		return std::make_shared<OGLGeometry>(generateInstancedParticleSystemBuffers(mInstanceAttributes));
+		return std::make_shared<OGLGeometry>(generateInstancedParticleSystemBuffers(mInstanceAttributes, mParticleCount, std::move(tfb)));
 	}
 
 	void prepareRenderData(MaterialFactory& aMaterialFactory, GeometryFactory& aGeometryFactory) override {
 		for (auto& mode : mRenderInfos) {
 			mode.second.shaderProgram = aMaterialFactory.getShaderProgram(mode.second.materialParams.mMaterialName);
+			
+			// bind TFO (transform feedback object)
+			GL_CHECK(glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, tfb.get()));
+
+			glTransformFeedbackVaryings(((OGLShaderProgram*)(mode.second.shaderProgram.get()))->program.get(), 3, mFeedbackParameterNames.data(), GL_INTERLEAVED_ATTRIBS);
+
 			getTextures(mode.second.materialParams.mParameterValues, aMaterialFactory);
 			mode.second.geometry = getGeometry(aGeometryFactory, mode.second.materialParams.mRenderStyle);
+
+			// Unbind TFO
+			GL_CHECK(glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, 0));
 		}
 	}
 
+	void setFeedbackParameters( std::vector<GLchar*>&& parameters) {
+		mFeedbackParameterNames = std::move(parameters);
+	}
+
 protected:
-	std::vector<VertexColor> mInstanceAttributes;
+	std::vector<VertexVelocityInitLife> mInstanceAttributes;
+	std::vector<GLchar*> mFeedbackParameterNames;
+	OpenGLResource tfb = createTransformFeedback();
+	unsigned int mParticleCount;
 };

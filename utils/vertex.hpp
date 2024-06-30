@@ -29,3 +29,28 @@ struct VertexNormTex {
 	glm::vec3 normal;
 	glm::vec2 texCoords;
 };
+
+
+
+struct VertexVelocityLife {
+	glm::vec3 position;
+	glm::vec3 velocity;
+	float lifetime;
+};
+
+struct VertexVelocityInitLife {
+	glm::vec3 position;
+	glm::vec3 velocity;
+	float lifetime;
+	float lifeDelay;
+
+	explicit operator VertexVelocityLife() const {
+		return VertexVelocityLife(position, velocity, lifetime);
+	}
+};
+
+
+struct VertexVelocity {
+	glm::vec3 position;
+	glm::vec3 velocity;
+};

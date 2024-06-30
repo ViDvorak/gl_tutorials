@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 #include <ranges>
+#include <cstdlib>
 
 #include "vertex.hpp"
 #include "scene_object.hpp"
@@ -92,25 +93,39 @@ inline SimpleScene createCubeScene(MaterialFactory &aMaterialFactory, GeometryFa
 	return scene;
 }
 
+/// <summary>
+/// Generates random float in interval <-1, 1>
+/// </summary>
+/// <returns>Returns float in interval <-1, 1></returns>
+inline float randomFloat() {
+	return (float)std::rand() / RAND_MAX;
+}
+
 
 inline SimpleScene createInstancedParticleSystemScene(MaterialFactory& aMaterialFactory, GeometryFactory& aGeometryFactory) {
 	SimpleScene scene;
-	std::vector<VertexColor> instanceAttributes;
+	std::vector<VertexVelocityInitLife> instanceAttributes;
 
-	// define center positions of cubes and theier colors
-	for (float x = -6.0f; x <= 6.0f; x += 1.5f) {
-		for (float y = -6.0f; y <= 6.0f; y += 1.5f) {
-			for (float z = -6.0f; z <= 6.0f; z += 1.5f) {
-				float red = (((instanceAttributes.size() + 31415) * 325) % 255) / 255.0f;
-				float green = (((instanceAttributes.size() + 81812) * 17) % 255) / 255.0f;
-				float blue = (((instanceAttributes.size() + 563) * 999) % 255) / 255.0f;
-				instanceAttributes.emplace_back(glm::vec3(x, y, z), glm::vec3(red, green, blue));
-			}
-		}
+	const unsigned int particleCount = 100;
+	const float minLifetime = 4;
+	const float maxLifetime = 7;
+	const float minLifeDelay = 0;
+	const float maxLifeDelay = 2;
+
+
+	// define initial positions and velocites of particles in squere and theyier velocity upwards
+	for (int i = 0; i < particleCount; i++) {
+		instanceAttributes.emplace_back( 
+			glm::vec3(randomFloat(), randomFloat(), 0), // offset of spawn point
+			glm::vec3(randomFloat(), randomFloat(), randomFloat() + 1), // initial velocity of an particle
+			(maxLifetime - minLifetime) * abs( randomFloat()) + minLifetime,// lifetime of an particle
+			(maxLifeDelay - minLifeDelay) * abs(randomFloat()) + minLifeDelay // time delay of spawn
+		);
 	}
 
+
 	{
-		auto instancedParticleSystem = std::make_shared<InstancedParticleSystem>(std::move(instanceAttributes));
+		auto instancedParticleSystem = std::make_shared<InstancedParticleSystem>(std::move(instanceAttributes), particleCount);
 		instancedParticleSystem->setScale(glm::vec3(0.1, 0.1, 0.1));
 		instancedParticleSystem->addMaterial(
 			"solid",
@@ -119,6 +134,7 @@ inline SimpleScene createInstancedParticleSystemScene(MaterialFactory& aMaterial
 				RenderStyle::Solid,
 				{
 					{"u_solidColor", glm::vec4(0,0.5,0.7,1)},
+					{"u_gravityDirection", glm::vec3(0,0, -0.1)},
 					{"u_particleScale", 0.5f },
 					{"u_noiseScale", 10.0f},
 					{"u_selectedNoise", 0},
@@ -133,6 +149,8 @@ inline SimpleScene createInstancedParticleSystemScene(MaterialFactory& aMaterial
 				{}
 			)
 		);
+		
+		instancedParticleSystem->setFeedbackParameters({ (GLchar*)"g_position", (GLchar*)"g_velocity", (GLchar*)"g_lifetime" });
 
 		instancedParticleSystem->prepareRenderData(aMaterialFactory, aGeometryFactory);
 		scene.addObject(instancedParticleSystem);

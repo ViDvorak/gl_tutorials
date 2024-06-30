@@ -47,6 +47,8 @@ public:
 		fallbackParameters["u_solidColor"] = glm::vec4(0,0,0,1);
 		fallbackParameters["u_viewPos"] = aCamera.getPosition();
 		fallbackParameters["u_elapsedTime"] = mElapsedTime;
+		fallbackParameters["u_deltaTime"] = deltaTime;
+
 
 		GL_CHECK(glPatchParameteri(GL_PATCH_VERTICES, 3));
 		for (const auto &data: renderData) {
@@ -61,6 +63,7 @@ public:
 			shaderProgram.use();
 			shaderProgram.setMaterialParameters(params.mParameterValues, fallbackParameters);
 			geometry.bind();
+			
 			if (params.mIsTesselation) {
 				geometry.draw(GL_PATCHES);
 			} else {
@@ -103,6 +106,12 @@ public:
 	}
 
 	void setCurrentTime(float aTime) {
+		if (isInitalTimeSet) {
+			deltaTime = 0;
+			isInitalTimeSet = false;
+		}
+		else
+			deltaTime = aTime - mElapsedTime;
 		mElapsedTime = aTime;
 	}
 
@@ -111,4 +120,6 @@ protected:
 
 	OGLMaterialFactory &mMaterialFactory;
 	float mElapsedTime = 0.0f;
+	float deltaTime = 0.0f;
+	bool isInitalTimeSet = true;
 };

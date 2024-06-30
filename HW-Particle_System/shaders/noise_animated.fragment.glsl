@@ -4,9 +4,11 @@
 
 out vec4 out_fragColor;
 
+// TODO particles should be effected by scene light
+
 uniform float u_elapsedTime = 0.0;
 
-in vec3 f_normal;
+in vec3 f_position;
 in vec2 f_texCoord;
 
 uniform float u_noiseScale = 10.0;
@@ -23,7 +25,7 @@ float noise_3d(vec3 coords) {
 }
 
 void main() {
-	vec3 coords = vec3(u_noiseScale*f_texCoord, u_elapsedTime);
+	vec3 coords = vec3(u_noiseScale * f_texCoord, u_elapsedTime);
 	float val = 0.5 + 0.5*noise_3d(coords);
 	out_fragColor = vec4(val, val, val, 1.0);
 }

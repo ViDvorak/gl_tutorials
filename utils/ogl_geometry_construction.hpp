@@ -15,10 +15,12 @@
 using VBOVector = std::vector<OpenGLResource>;
 struct IndexedBuffer {
 	OpenGLResource vao;
+	OpenGLResource tfb; // transform feedback buffer
 	std::vector<OpenGLResource> vbos;
 	unsigned int indexCount = 0;
 	unsigned int instanceCount = 0;
 	GLenum mode = GL_TRIANGLES;
+	bool isTransformFeedbackLoopEnabled = false;
 };
 
 inline glm::vec3 insertDimension(const glm::vec2& v, int dimension, float value) {

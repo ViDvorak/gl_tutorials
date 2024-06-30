@@ -82,6 +82,18 @@ inline OpenGLResource createBuffer() {
 		});
 }
 
+inline OpenGLResource createTransformFeedback() {
+	return OpenGLResource(
+		[] {
+			GLuint id = 0;
+			GL_CHECK(glGenTransformFeedbacks(1, &id));
+			return id;
+		},
+		[](GLuint id) {
+			glDeleteTransformFeedbacks(1, &id);
+		});
+}
+
 inline OpenGLResource createQuery() {
 	return OpenGLResource(
 		[]{

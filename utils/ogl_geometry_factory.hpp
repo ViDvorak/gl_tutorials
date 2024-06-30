@@ -21,6 +21,9 @@ public:
 
 	void bind() const {
 		GL_CHECK(glBindVertexArray(buffer.vao.get()));
+		if (buffer.isTransformFeedbackLoopEnabled) {
+			GL_CHECK(glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, buffer.tfb.get()));
+		}
 	}
 
 	void draw() const {
@@ -28,11 +31,17 @@ public:
 	}
 
 	void draw(GLenum aMode) const {
+		if (buffer.isTransformFeedbackLoopEnabled)
+			GL_CHECK(glBeginTransformFeedback(aMode));
+
 		if (buffer.instanceCount == 0) {
 			GL_CHECK(glDrawElements(aMode, buffer.indexCount, GL_UNSIGNED_INT, reinterpret_cast<void*>(0)));
 		} else {
 			GL_CHECK(glDrawElementsInstanced(aMode, buffer.indexCount, GL_UNSIGNED_INT, reinterpret_cast<void*>(0), buffer.instanceCount));
 		}
+
+		if (buffer.isTransformFeedbackLoopEnabled)
+			GL_CHECK(glEndTransformFeedback());
 	}
 };
 
