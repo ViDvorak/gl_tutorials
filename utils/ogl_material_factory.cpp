@@ -1,3 +1,4 @@
+#pragma once
 #include "ogl_material_factory.hpp"
 #include <iostream>
 #include <ranges>
@@ -7,6 +8,8 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
+
+#include "../HW-Particle_System/tfb.h"
 
 
 inline ShaderProgramFiles listShaderFiles(const fs::path& aShaderDir) {
@@ -191,6 +194,8 @@ void OGLMaterialFactory::loadShadersFromDir(fs::path aShaderDir) {
 		std::cout << "Creating shader program: " << programFile.first << "\n";
 		auto shaderNames = parseProgramFile(programFile.second);
 
+		std::function<void(const GLuint)> runBeforeLink = [](const GLuint)-> void {};
+
 		CompiledShaderStages shaderStages;
 		for (auto &[shaderType, shaderName] : shaderNames) {
 			auto &compShaders = compiledShaders[shaderType];
@@ -201,8 +206,26 @@ void OGLMaterialFactory::loadShadersFromDir(fs::path aShaderDir) {
 						+ shaderType + ") : " + shaderName + " was not compiled.");
 			}
 			shaderStages.push_back(&(it->second));
+			
+
+
+			// TODO bind variables
+			if (it->first == "particle_system" && shaderType == "vertex") {
+				const GLuint r = it->second.get();
+
+				runBeforeLink = [](const GLuint programID)-> void {
+					std::cout << "TFB index " << programID << std::endl;
+					GL_CHECK(glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, tfb_ParticleSystem.get()));
+					GL_CHECK(glTransformFeedbackVaryings(programID, variablesToCapture.size(), variablesToCapture.data(), GL_INTERLEAVED_ATTRIBS));
+					};
+			}
 		}
-		auto program = createShaderProgram(shaderStages);
+
+
+
+
+
+		auto program = createShaderProgram(shaderStages, runBeforeLink);
 		auto uniforms = listShaderUniforms(program);
 		for (auto info : uniforms) {
 			std::cout

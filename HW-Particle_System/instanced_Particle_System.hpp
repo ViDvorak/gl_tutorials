@@ -109,6 +109,8 @@ inline IndexedBuffer generateInstancedParticleSystemBuffers(const std::vector<Ve
 
 	// bind transform feedback buffer
 	GL_CHECK(glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, buffers.vbos[3].get()));
+	GL_CHECK(glBufferData(GL_TRANSFORM_FEEDBACK_BUFFER, vertices.size(), nullptr, GL_STATIC_READ));
+	GL_CHECK(glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, buffers.vbos[3].get()));
 
 
 
@@ -133,10 +135,12 @@ public:
 		for (auto& mode : mRenderInfos) {
 			mode.second.shaderProgram = aMaterialFactory.getShaderProgram(mode.second.materialParams.mMaterialName);
 			
+			/*
 			// bind TFO (transform feedback object)
 			GL_CHECK(glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, tfb.get()));
 
 			glTransformFeedbackVaryings(((OGLShaderProgram*)(mode.second.shaderProgram.get()))->program.get(), 3, mFeedbackParameterNames.data(), GL_INTERLEAVED_ATTRIBS);
+			*/
 
 			getTextures(mode.second.materialParams.mParameterValues, aMaterialFactory);
 			mode.second.geometry = getGeometry(aGeometryFactory, mode.second.materialParams.mRenderStyle);

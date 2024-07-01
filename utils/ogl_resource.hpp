@@ -90,7 +90,7 @@ inline OpenGLResource createTransformFeedback() {
 			return id;
 		},
 		[](GLuint id) {
-			glDeleteTransformFeedbacks(1, &id);
+			GL_CHECK(glDeleteTransformFeedbacks(1, &id));
 		});
 }
 

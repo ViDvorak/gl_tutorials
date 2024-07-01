@@ -115,11 +115,15 @@ inline auto compileShader(GLenum aShaderType, const std::string& aSource) {
 
 using CompiledShaderStages = std::vector<const OpenGLResource *>;
 
-inline auto createShaderProgram(const CompiledShaderStages &aShaderStages) {
+inline auto createShaderProgram(const CompiledShaderStages &aShaderStages, std::function<void(const GLuint)> runBeforeLink = [](const GLuint param)->void{}) {
 	auto program = createShaderProgram();
 	for (auto &shader : aShaderStages) {
 		GL_CHECK(glAttachShader(program.get(), shader->get()));
 	}
+
+
+	runBeforeLink(program.get());
+
 	GL_CHECK(glLinkProgram(program.get()));
 
 	GLint isLinked = 0;

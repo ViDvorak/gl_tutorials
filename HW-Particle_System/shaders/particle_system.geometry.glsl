@@ -7,6 +7,8 @@ uniform vec3 u_viewPos;
 uniform float u_particleScale;
 
 in vec3 g_position[];
+in vec3 g_velocity[];
+in float g_lifetime[];
 //in vec3 g_normal[];
 //in vec3 g_color[];
 

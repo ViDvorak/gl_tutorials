@@ -19,6 +19,13 @@
 
 #include <glm/gtx/string_cast.hpp>
 
+#include <tfb.h>
+
+std::vector<GLchar*> variablesToCapture;
+OpenGLResource tfb_ParticleSystem;
+
+
+
 void toggle(const std::string &aToggleName, bool &aToggleValue) {
 
 	aToggleValue = !aToggleValue;
@@ -91,6 +98,14 @@ int main() {
 			});
 
 		OGLMaterialFactory materialFactory;
+
+
+		// bind TFO (transform feedback object)
+		tfb_ParticleSystem = createTransformFeedback();
+		variablesToCapture = { (GLchar*)"g_position", (GLchar*)"g_velocity", (GLchar*)"g_lifetime" };
+
+		//GL_CHECK(glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, tfb_ParticleSystem.get()));
+
 		materialFactory.loadShadersFromDir("./shaders/");
 		materialFactory.loadTexturesFromDir("./textures/");
 

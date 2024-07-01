@@ -25,6 +25,7 @@ out float g_lifetime;
 
 void main(void)
 {
+	g_lifetime = in_lifetime + u_deltaTime;
 	float elapsedLife = mod( in_lifetime - in_particleDelay, in_particleLife);
 
 	if (elapsedLife < u_deltaTime)
@@ -42,6 +43,5 @@ void main(void)
 		gl_Position = u_projMat * u_viewMat * u_modelMat * vec4(g_position, 1);
 	
 		g_velocity = in_velocity - u_gravityDirection;
-		g_lifetime = in_lifetime + u_deltaTime;
 	}
 }
