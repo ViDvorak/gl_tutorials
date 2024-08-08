@@ -31,6 +31,7 @@ void main(void)
 	if (elapsedLife < u_deltaTime)
 	{
 		// respawn particle
+		
 		g_position = in_initPosition;
 		gl_Position = u_projMat * u_viewMat * u_modelMat * vec4(in_initPosition, 1);
 

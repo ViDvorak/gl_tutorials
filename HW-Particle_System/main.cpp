@@ -100,7 +100,7 @@ int main() {
 		OGLMaterialFactory materialFactory;
 
 
-		// bind TFO (transform feedback object)
+		// create TFO (transform feedback object)
 		tfb_ParticleSystem = createTransformFeedback();
 		variablesToCapture = { (GLchar*)"g_position", (GLchar*)"g_velocity", (GLchar*)"g_lifetime" };
 

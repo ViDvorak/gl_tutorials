@@ -208,20 +208,15 @@ void OGLMaterialFactory::loadShadersFromDir(fs::path aShaderDir) {
 			shaderStages.push_back(&(it->second));
 			
 
-
-			// TODO bind variables
+			// binds transform feedback variables
 			if (it->first == "particle_system" && shaderType == "vertex") {
-				const GLuint r = it->second.get();
-
 				runBeforeLink = [](const GLuint programID)-> void {
-					std::cout << "TFB index " << programID << std::endl;
+					std::cout << "Shader program ID: " << programID << std::endl;
 					GL_CHECK(glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, tfb_ParticleSystem.get()));
 					GL_CHECK(glTransformFeedbackVaryings(programID, variablesToCapture.size(), variablesToCapture.data(), GL_INTERLEAVED_ATTRIBS));
 					};
 			}
 		}
-
-
 
 
 
