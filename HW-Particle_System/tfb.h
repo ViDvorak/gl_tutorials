@@ -5,6 +5,6 @@
 #include "ogl_resource.hpp"
 
 extern std::vector<GLchar*> variablesToCapture;
-extern OpenGLResource tfb_ParticleSystem;
+//extern OpenGLResource tfb_ParticleSystem;
 
 #endif

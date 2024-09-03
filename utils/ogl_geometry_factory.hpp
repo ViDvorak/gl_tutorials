@@ -12,32 +12,31 @@
 
 namespace fs = std::filesystem;
 
-unsigned int currentTFBOIndex = 0;
-
 class OGLGeometry: public AGeometry {
 public:
 
 
 	OGLGeometry(IndexedBuffer buff):
-		buffer(std::move(buff))
-	{}
+		buffer(std::move(buff)), currentTFBO_ptr(std::make_shared<unsigned int>(0))
+	{
+	}
 
 	// problém je tady není definovaný copy construktor
 	// problem is there is no OpenGLResource copy constructor? or it is that there is automatic OGLGeometry copy constructor
 
 	IndexedBuffer buffer;
-
+	std::shared_ptr<unsigned int> currentTFBO_ptr;
 
 
 	void bind() const{
 		if (buffer.isTransformFeedbackLoopEnabled) {
-			int previusTFBO = (currentTFBOIndex + 1) % 2;
+			int previusTFBO = (*currentTFBO_ptr + 1) % 2;
 
 			GL_CHECK(glBindVertexArray(buffer.vaos[previusTFBO].get()));
 			GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, buffer.vbos[previusTFBO].get()));
-			GL_CHECK(glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, buffer.vbos[currentTFBOIndex].get()));
+			GL_CHECK(glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, buffer.vbos[*currentTFBO_ptr].get()));
 
-			currentTFBOIndex = previusTFBO;
+			*currentTFBO_ptr = previusTFBO;
 		}
 		else {
 			GL_CHECK(glBindVertexArray(buffer.vaos[0].get()));
@@ -64,13 +63,13 @@ public:
 			GL_CHECK(glEndTransformFeedback());
 			// TODO switch base buffer to newly populated one
 			// is there a need to use vbos for the switch?
-			int previusTFBO = (currentTFBOIndex + 1) % 2;
+			int previusTFBO = (*currentTFBO_ptr + 1) % 2;
 
 			//auto glGeometry = (const_cast<OGLGeometry*> (this));
 			
 			// ping-pong buffering
-			// std::swap( buffer.vaos [currentTFBOIndex], buffer.vaos [previusTFBO]);
-			// std::swap( buffer.tfbos[currentTFBOIndex], buffer.tfbos[previusTFBO]);
+			// std::swap( buffer.vaos [*currentTFBO_ptr], buffer.vaos [previusTFBO]);
+			// std::swap( buffer.tfbos[*currentTFBO_ptr], buffer.tfbos[previusTFBO]);
 		}
 	}
 };

@@ -28,7 +28,12 @@ public:
 	}
 
 	// Disable copy operations
-	OpenGLResource(const OpenGLResource&) = delete;
+	//OpenGLResource(const OpenGLResource&) = delete;
+	OpenGLResource(const OpenGLResource& orig) {
+		mId = orig.mId;
+		//mDeleteFunc = [](GLuint) {};
+	}
+
 	OpenGLResource& operator=(const OpenGLResource&) = delete;
 
 	// Enable move operations

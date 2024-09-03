@@ -212,7 +212,7 @@ void OGLMaterialFactory::loadShadersFromDir(fs::path aShaderDir) {
 			if (it->first == "particle_system" && shaderType == "vertex") {
 				runBeforeLink = [](const GLuint programID)-> void {
 					std::cout << "Shader program ID: " << programID << std::endl;
-					GL_CHECK(glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, tfb_ParticleSystem.get()));
+					//GL_CHECK(glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, tfb_ParticleSystem.get()));
 					GL_CHECK(glTransformFeedbackVaryings(programID, variablesToCapture.size(), variablesToCapture.data(), GL_INTERLEAVED_ATTRIBS));
 					};
 			}
