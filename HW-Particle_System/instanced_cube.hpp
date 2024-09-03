@@ -8,7 +8,7 @@
 
 inline IndexedBuffer generateInstancedCubeBuffers(const std::vector<VertexColor> &aPositionColorAttribs) {
 	IndexedBuffer buffers {
-		createVertexArray(),
+		{createVertexArray()},
 	};
 	buffers.vbos.push_back(createBuffer());
 	buffers.vbos.push_back(createBuffer());
@@ -32,7 +32,7 @@ inline IndexedBuffer generateInstancedCubeBuffers(const std::vector<VertexColor>
 		}
 	}
 
-	GL_CHECK(glBindVertexArray(buffers.vao.get()));
+	GL_CHECK(glBindVertexArray(buffers.vaos[0].get()));
 
 	GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, buffers.vbos[0].get()));
 	GL_CHECK(glBufferData(GL_ARRAY_BUFFER, sizeof(VertexNormTex) * vertices.size(), vertices.data(), GL_STATIC_DRAW));

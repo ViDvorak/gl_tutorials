@@ -22,7 +22,7 @@
 #include <tfb.h>
 
 std::vector<GLchar*> variablesToCapture;
-OpenGLResource tfb_ParticleSystem;
+// OpenGLResource tfb_ParticleSystem;
 
 
 
@@ -101,10 +101,9 @@ int main() {
 
 
 		// create TFO (transform feedback object)
-		tfb_ParticleSystem = createTransformFeedback();
-		variablesToCapture = { (GLchar*)"g_position", (GLchar*)"g_velocity", (GLchar*)"g_lifetime" };
+		// tfb_ParticleSystem = createTransformFeedback(); // TODO it is not needed?
+		variablesToCapture = { (GLchar*)"f_position", (GLchar*)"f_velocity", (GLchar*)"f_lifetime" };
 
-		//GL_CHECK(glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, tfb_ParticleSystem.get()));
 
 		materialFactory.loadShadersFromDir("./shaders/");
 		materialFactory.loadTexturesFromDir("./textures/");

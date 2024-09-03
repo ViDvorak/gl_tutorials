@@ -18,19 +18,16 @@ Recommended approach:
 
 inline IndexedBuffer generateInstancedParticleSystemBuffers(const std::vector<VertexVelocityInitLife>& aPositionColorAttribs, unsigned int aParticleCount, OpenGLResource&& tfb) {
 	IndexedBuffer buffers{
-		createVertexArray(),
-		std::move(tfb),
+		{createVertexArray(), createVertexArray()},
+		{createBuffer(), createBuffer()}
 	};
-	buffers.vbos.push_back(createBuffer());
-	buffers.vbos.push_back(createBuffer());
-	buffers.vbos.push_back(createBuffer());
 	buffers.vbos.push_back(createBuffer());
 
 	buffers.isTransformFeedbackLoopEnabled = true;
 
 
 	std::vector<VertexVelocityLife> vertices;
-	std::vector<unsigned int> indices;
+	// std::vector<unsigned int> indices;
 
 	// TODO insted of vertices pass to the VBO only centers of the particles
 	// TODO in vertex shader move particles in direction of theier velocity potencialy with some randomization and lower the velocity
@@ -39,82 +36,94 @@ inline IndexedBuffer generateInstancedParticleSystemBuffers(const std::vector<Ve
 
 	
 	for (VertexVelocityInitLife vertex : aPositionColorAttribs) {
+		// load changing parameters 4x because of transform feedback captures data after the geometry shader per EmitedVertex.
+		vertices.emplace_back(std::move((VertexVelocityLife)vertex));
+		vertices.emplace_back(std::move((VertexVelocityLife)vertex));
+		vertices.emplace_back(std::move((VertexVelocityLife)vertex));
 		vertices.emplace_back(std::move((VertexVelocityLife)vertex));
 	}
 
 	// new EBO data definition
-	for (unsigned int i = 0; i < aParticleCount; ++i) {
-		indices.push_back(i);
+	// for (unsigned int i = 0; i < aParticleCount; ++i) {
+	// 	 indices.push_back(i);
+	// }
+
+
+	for (int i = 0; i < 2; ++i) {
+		// bind VAO 
+		GL_CHECK(glBindVertexArray(buffers.vaos[i].get()));
+
+		// bind VBO with vertex data
+		GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, buffers.tfbos[i].get()));
+		GL_CHECK(glBufferData(GL_ARRAY_BUFFER, sizeof(VertexVelocityLife) * vertices.size(), vertices.data(), GL_STATIC_DRAW));
+
+		// bind EBO
+		//GL_CHECK(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers.vbos[1].get()));
+		//GL_CHECK(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * indices.size(), indices.data(), GL_STATIC_DRAW));
+
+
+
+		// asociated with current VBO [1]
+		// current position
+		GL_CHECK(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexVelocityLife) * 4, (void*)0));
+		GL_CHECK(glEnableVertexAttribArray(0));
+		//GL_CHECK(glVertexAttribDivisor(0, 1));
+
+		// current velocity
+		GL_CHECK(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexVelocityLife) * 4, (void*)(sizeof(glm::vec3))));
+		GL_CHECK(glEnableVertexAttribArray(1));
+		//GL_CHECK(glVertexAttribDivisor(1, 1));
+	
+		// elapsed timeOfLife of the particel
+		GL_CHECK(glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(VertexVelocityLife) * 4, (void*)(2 * sizeof(glm::vec3)))); // last parameter is offset
+		GL_CHECK(glEnableVertexAttribArray(2));
+		//GL_CHECK(glVertexAttribDivisor(2, 1));
+
+
+
+
+		// INSTANCE ATTRIBUTES
+		// position and color of each particle
+
+		// Bind VBO
+		GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, buffers.vbos[0].get()));
+		GL_CHECK(glBufferData(GL_ARRAY_BUFFER, sizeof(VertexVelocityInitLife) * aPositionColorAttribs.size(), aPositionColorAttribs.data(), GL_STATIC_DRAW));
+
+		// initial position
+		GL_CHECK(glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(VertexVelocityInitLife), (void*)(0)));
+		GL_CHECK(glEnableVertexAttribArray(3));
+		//GL_CHECK(glVertexAttribDivisor(3, 1));
+
+		// initial velocity
+		GL_CHECK(glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(VertexVelocityInitLife), (void*)(sizeof(glm::vec3))));
+		GL_CHECK(glEnableVertexAttribArray(4));
+		//GL_CHECK(glVertexAttribDivisor(4, 1));
+
+		// time of a particle life
+		GL_CHECK(glVertexAttribPointer(5, 1, GL_FLOAT, GL_FALSE, sizeof(VertexVelocityInitLife), (void*)(2 * sizeof(glm::vec3))));
+		GL_CHECK(glEnableVertexAttribArray(5));
+		//GL_CHECK(glVertexAttribDivisor(5, 1));
+
+		// initial lifeDelay
+		GL_CHECK(glVertexAttribPointer(6, 1, GL_FLOAT, GL_FALSE, sizeof(VertexVelocityInitLife), (void*)(2 * (sizeof(glm::vec3) + sizeof(float) )) ));
+		GL_CHECK(glEnableVertexAttribArray(6));
+		//GL_CHECK(glVertexAttribDivisor(6, 1));
+
+		// Unbind VAO
+		GL_CHECK(glBindVertexArray(0));
+
 	}
 
-	// bind VAO 
-	GL_CHECK(glBindVertexArray(buffers.vao.get()));
 
-	// bind VBO with vertex data
-	GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, buffers.vbos[0].get()));
-	GL_CHECK(glBufferData(GL_ARRAY_BUFFER, sizeof(VertexVelocityLife) * vertices.size(), vertices.data(), GL_STATIC_DRAW)); // TODO change there is data overlap
-
-	// bind EBO
-	GL_CHECK(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers.vbos[1].get()));
-	GL_CHECK(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * indices.size(), indices.data(), GL_STATIC_DRAW));
-
-
-
-	// asociated with current VBO [1]
-	// current position
-	GL_CHECK(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexVelocityLife), (void*)0));
-	GL_CHECK(glEnableVertexAttribArray(0));
-
-	// current velocity
-	GL_CHECK(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexVelocityLife), (void*)(sizeof(glm::vec3))));
-	GL_CHECK(glEnableVertexAttribArray(1));
-	
-	// elapsed timeOfLife of the particel
-	GL_CHECK(glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(VertexVelocityLife), (void*)(2 * sizeof(glm::vec3)))); // last parameter is offset
-	GL_CHECK(glEnableVertexAttribArray(2));
-
-
-
-
-	// INSTANCE ATTRIBUTES
-	// position and color of each particle
-
-	// Bind VBO
-	GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, buffers.vbos[2].get()));
-	GL_CHECK(glBufferData(GL_ARRAY_BUFFER, sizeof(VertexColor) * aPositionColorAttribs.size(), aPositionColorAttribs.data(), GL_STATIC_DRAW));
-
-	// initial position
-	GL_CHECK(glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(VertexVelocityInitLife), (void*)(0)));
-	GL_CHECK(glEnableVertexAttribArray(3));
-	GL_CHECK(glVertexAttribDivisor(3, 1)); // 1 means the attribute advances once per instance
-
-	// initial velocity
-	GL_CHECK(glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(VertexVelocityInitLife), (void*)(sizeof(glm::vec3))));
-	GL_CHECK(glEnableVertexAttribArray(4));
-	GL_CHECK(glVertexAttribDivisor(4, 1)); // 1 means the attribute advances once per instance
-
-	// time of a particle life
-	GL_CHECK(glVertexAttribPointer(5, 1, GL_FLOAT, GL_FALSE, sizeof(VertexVelocityInitLife), (void*)(2 * sizeof(glm::vec3))));
-	GL_CHECK(glEnableVertexAttribArray(5));
-	GL_CHECK(glVertexAttribDivisor(5, 1)); // 1 means the attribute advances once per instance
-
-	// initial lifeDelay
-	GL_CHECK(glVertexAttribPointer(6, 1, GL_FLOAT, GL_FALSE, sizeof(VertexVelocityInitLife), (void*)(2 * (sizeof(glm::vec3) + sizeof(float) )) ));
-	GL_CHECK(glEnableVertexAttribArray(6));
-	GL_CHECK(glVertexAttribDivisor(6, 1));
-
-	// Unbind VAO
-	GL_CHECK(glBindVertexArray(0));
-
-
+	// TODO Settup transform feedback buffer
 	// bind transform feedback buffer
-	GL_CHECK(glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, buffers.vbos[3].get()));
-	GL_CHECK(glBufferData(GL_TRANSFORM_FEEDBACK_BUFFER, vertices.size(), nullptr, GL_STATIC_READ));
-	GL_CHECK(glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, buffers.vbos[3].get()));
+	// GL_CHECK(glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, buffers.vbos[3].get()));
+	// GL_CHECK(glBufferData(GL_TRANSFORM_FEEDBACK_BUFFER, sizeof(VertexVelocityLife) * vertices.size(), nullptr, GL_STATIC_READ));
+	// GL_CHECK(glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, buffers.vbos[3].get()));
 
 
 
-	buffers.indexCount = unsigned(indices.size());
+	buffers.indexCount = unsigned(aParticleCount);
 	buffers.instanceCount = unsigned(aPositionColorAttribs.size());
 	buffers.mode = GL_POINTS;
 	return buffers;
@@ -134,13 +143,6 @@ public:
 	void prepareRenderData(MaterialFactory& aMaterialFactory, GeometryFactory& aGeometryFactory) override {
 		for (auto& mode : mRenderInfos) {
 			mode.second.shaderProgram = aMaterialFactory.getShaderProgram(mode.second.materialParams.mMaterialName);
-			
-			/*
-			// bind TFO (transform feedback object)
-			GL_CHECK(glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, tfb.get()));
-
-			glTransformFeedbackVaryings(((OGLShaderProgram*)(mode.second.shaderProgram.get()))->program.get(), 3, mFeedbackParameterNames.data(), GL_INTERLEAVED_ATTRIBS);
-			*/
 
 			getTextures(mode.second.materialParams.mParameterValues, aMaterialFactory);
 			mode.second.geometry = getGeometry(aGeometryFactory, mode.second.materialParams.mRenderStyle);

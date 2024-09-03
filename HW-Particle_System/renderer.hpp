@@ -56,6 +56,9 @@ public:
 			const MaterialParameters &params = data.mMaterialParams;
 			const OGLShaderProgram &shaderProgram = static_cast<const OGLShaderProgram &>(data.mShaderProgram);
 			const OGLGeometry &geometry = static_cast<const OGLGeometry&>(data.mGeometry);
+			// it is not possible to copy because OpenGLRecource in a OGLGeometry does have removed copy constructor
+			// I need an option to copy OpenGLResource
+			// It is possible to use shered pointer for copy?
 
 			fallbackParameters["u_modelMat"] = modelMat;
 			fallbackParameters["u_normalMat"] = glm::mat3(modelMat);
@@ -90,6 +93,9 @@ public:
 		fallbackParameters["u_viewMat"] = view;
 		fallbackParameters["u_solidColor"] = glm::vec4(0,0,0,1);
 		fallbackParameters["u_viewPos"] = aCamera.getPosition();
+		fallbackParameters["u_elapsedTime"] = mElapsedTime;
+		fallbackParameters["u_deltaTime"] = deltaTime;
+
 		for (const auto &data: renderData) {
 			const glm::mat4 &modelMat = data.modelMat;
 			const OGLGeometry &geometry = static_cast<const OGLGeometry&>(data.mGeometry);

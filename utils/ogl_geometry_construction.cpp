@@ -41,7 +41,7 @@ const float cubeVertices[] = {
 IndexedBuffer
 generateAxisGizmo() {
 	IndexedBuffer buffers {
-		createVertexArray(),
+		{createVertexArray()},
 	};
 	buffers.vbos.push_back(createBuffer());
 	buffers.vbos.push_back(createBuffer());
@@ -61,7 +61,7 @@ generateAxisGizmo() {
 		2, 3,
 		4, 5
 	};
-	GL_CHECK(glBindVertexArray(buffers.vao.get()));
+	GL_CHECK(glBindVertexArray(buffers.vaos[0].get()));
 
 	GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, buffers.vbos[0].get()));
 	GL_CHECK(glBufferData(GL_ARRAY_BUFFER, sizeof(VertexColor) * gizmoVertices.size(), gizmoVertices.data(), GL_STATIC_DRAW));
@@ -96,12 +96,12 @@ static const std::array<VertexTex, 4> quadVertices = {
 IndexedBuffer
 generateQuadTex() {
 	IndexedBuffer buffers {
-		createVertexArray(),
+		{createVertexArray()},
 	};
 	buffers.vbos.push_back(createBuffer());
 	buffers.vbos.push_back(createBuffer());
 
-	GL_CHECK(glBindVertexArray(buffers.vao.get()));
+	GL_CHECK(glBindVertexArray(buffers.vaos[0].get()));
 
 	GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, buffers.vbos[0].get()));
 	GL_CHECK(glBufferData(GL_ARRAY_BUFFER, sizeof(VertexTex) * quadVertices.size(), quadVertices.data(), GL_STATIC_DRAW));
@@ -128,7 +128,7 @@ generateQuadTex() {
 IndexedBuffer
 generateCubeOutlineBuffers() {
 	IndexedBuffer buffers {
-		createVertexArray(),
+		{createVertexArray()},
 	};
 	buffers.vbos.push_back(createBuffer());
 	buffers.vbos.push_back(createBuffer());
@@ -145,7 +145,7 @@ generateCubeOutlineBuffers() {
 	};
 
 
-	GL_CHECK(glBindVertexArray(buffers.vao.get()));
+	GL_CHECK(glBindVertexArray(buffers.vaos[0].get()));
 
 	GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, buffers.vbos[0].get()));
 	GL_CHECK(glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), cubeVertices, GL_STATIC_DRAW));
@@ -169,7 +169,7 @@ generateCubeOutlineBuffers() {
 IndexedBuffer
 generateCubeBuffers() {
 	IndexedBuffer buffers {
-		createVertexArray(),
+		{createVertexArray()},
 	};
 	buffers.vbos.push_back(createBuffer());
 	buffers.vbos.push_back(createBuffer());
@@ -192,7 +192,7 @@ generateCubeBuffers() {
 	};
 
 
-	GL_CHECK(glBindVertexArray(buffers.vao.get()));
+	GL_CHECK(glBindVertexArray(buffers.vaos[0].get()));
 
 	GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, buffers.vbos[0].get()));
 	GL_CHECK(glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), cubeVertices, GL_STATIC_DRAW));
@@ -216,7 +216,7 @@ generateCubeBuffers() {
 IndexedBuffer
 generateCubeBuffersNormTex() {
 	IndexedBuffer buffers {
-		createVertexArray(),
+		{createVertexArray()},
 	};
 	buffers.vbos.push_back(createBuffer());
 	buffers.vbos.push_back(createBuffer());
@@ -239,7 +239,7 @@ generateCubeBuffersNormTex() {
 		}
 	}
 
-	GL_CHECK(glBindVertexArray(buffers.vao.get()));
+	GL_CHECK(glBindVertexArray(buffers.vaos[0].get()));
 
 	GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, buffers.vbos[0].get()));
 	GL_CHECK(glBufferData(GL_ARRAY_BUFFER, sizeof(VertexNormTex) * vertices.size(), vertices.data(), GL_STATIC_DRAW));
@@ -270,7 +270,7 @@ generateCubeBuffersNormTex() {
 IndexedBuffer
 generatePlaneOutlineBuffers() {
 	IndexedBuffer buffers {
-		createVertexArray(),
+		{createVertexArray()},
 	};
 	buffers.vbos.push_back(createBuffer());
 	buffers.vbos.push_back(createBuffer());
@@ -283,7 +283,7 @@ generatePlaneOutlineBuffers() {
 	};
 
 
-	GL_CHECK(glBindVertexArray(buffers.vao.get()));
+	GL_CHECK(glBindVertexArray(buffers.vaos[0].get()));
 
 	GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, buffers.vbos[0].get()));
 	GL_CHECK(glBufferData(GL_ARRAY_BUFFER, 3*sizeof(float) * planeVertices.size(), planeVertices.data(), GL_STATIC_DRAW));
@@ -307,7 +307,7 @@ generatePlaneOutlineBuffers() {
 IndexedBuffer
 generatePlaneBuffers() {
 	IndexedBuffer buffers {
-		createVertexArray(),
+		{createVertexArray()},
 	};
 	buffers.vbos.push_back(createBuffer());
 	buffers.vbos.push_back(createBuffer());
@@ -325,7 +325,7 @@ generatePlaneBuffers() {
 		indices.push_back(index);
 	}
 
-	GL_CHECK(glBindVertexArray(buffers.vao.get()));
+	GL_CHECK(glBindVertexArray(buffers.vaos[0].get()));
 
 	GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, buffers.vbos[0].get()));
 	GL_CHECK(glBufferData(GL_ARRAY_BUFFER, sizeof(VertexNormTex) * vertices.size(), vertices.data(), GL_STATIC_DRAW));
@@ -356,13 +356,13 @@ generatePlaneBuffers() {
 IndexedBuffer
 generateMeshBuffersNormTex(const ObjMesh &aMesh) {
 	IndexedBuffer buffers {
-		createVertexArray(),
+		{createVertexArray()},
 	};
 	buffers.vbos.push_back(createBuffer());
 	buffers.vbos.push_back(createBuffer());
 
 
-	GL_CHECK(glBindVertexArray(buffers.vao.get()));
+	GL_CHECK(glBindVertexArray(buffers.vaos[0].get()));
 
 	GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, buffers.vbos[0].get()));
 	GL_CHECK(glBufferData(GL_ARRAY_BUFFER, sizeof(VertexNormTex) * aMesh.vertices.size(), aMesh.vertices.data(), GL_STATIC_DRAW));
