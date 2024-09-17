@@ -14,7 +14,6 @@ in float g_lifetime[];
 out vec2 f_texCoord;
 out vec3 f_position;
 
-out vec3 f_position;
 out vec3 f_velocity;
 out float f_lifetime;
 
