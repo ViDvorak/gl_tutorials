@@ -215,9 +215,10 @@ generateCubeBuffers() {
 
 IndexedBuffer
 generateCubeBuffersNormTex() {
-	IndexedBuffer buffers {
-		{createVertexArray()},
-	};
+	std::vector<OpenGLResource> vaos { createVertexArray(), createVertexArray() };
+
+	IndexedBuffer buffers(std::move(vaos));
+
 	buffers.vbos.push_back(createBuffer());
 	buffers.vbos.push_back(createBuffer());
 

@@ -26,6 +26,7 @@ constexpr unsigned int DEBUG = 1 << 7;
 
 
 inline SimpleScene createCubeScene(MaterialFactory &aMaterialFactory, GeometryFactory &aGeometryFactory) {
+	std::cout << "Cube scene creation initiated" << std::endl;
 	SimpleScene scene;
 	{
 		auto cube = std::make_shared<Cube>();
@@ -90,6 +91,7 @@ inline SimpleScene createCubeScene(MaterialFactory &aMaterialFactory, GeometryFa
 		cube->prepareRenderData(aMaterialFactory, aGeometryFactory);
 		scene.addObject(cube);
 	}
+	std::cout << "Cube scene creation ended" << std::endl;
 	return scene;
 }
 
@@ -103,6 +105,7 @@ inline float randomFloat() {
 
 
 inline SimpleScene createInstancedParticleSystemScene(MaterialFactory& aMaterialFactory, GeometryFactory& aGeometryFactory) {
+	std::cout << "Particle System scene creation initiated" << std::endl;
 	SimpleScene scene;
 	std::vector<VertexVelocityInitLife> instanceAttributes;
 
@@ -156,13 +159,14 @@ inline SimpleScene createInstancedParticleSystemScene(MaterialFactory& aMaterial
 		scene.addObject(instancedParticleSystem);
 	}
 
+	std::cout << "Particle System scene creation ended" << std::endl;
 
-	
 	return scene;
 }
 
 
 inline SimpleScene createInstancedCubesScene(MaterialFactory &aMaterialFactory, GeometryFactory &aGeometryFactory) {
+	std::cout << "instanced Cube scene creation initiated" << std::endl;
 	SimpleScene scene;
 	std::vector<VertexColor> instanceAttributes;
 
@@ -202,11 +206,14 @@ inline SimpleScene createInstancedCubesScene(MaterialFactory &aMaterialFactory, 
 	instancedCube->prepareRenderData(aMaterialFactory, aGeometryFactory);
 
 	scene.addObject(instancedCube);
+	std::cout << "instanced Cube scene creation ended" << std::endl;
 	return scene;
 }
 
 
 inline SimpleScene createMonkeyScene(MaterialFactory &aMaterialFactory, GeometryFactory &aGeometryFactory) {
+	std::cout << "Monkey scene creation initiated" << std::endl;
+
 	SimpleScene scene;
 	{
 		auto mesh = std::make_shared<LoadedMeshObject>("./geometry/monkey.obj");
@@ -275,5 +282,6 @@ inline SimpleScene createMonkeyScene(MaterialFactory &aMaterialFactory, Geometry
 		mesh->prepareRenderData(aMaterialFactory, aGeometryFactory);
 		scene.addObject(mesh);
 	}
+	std::cout << "Monkey scene creation ended" << std::endl;
 	return scene;
 }

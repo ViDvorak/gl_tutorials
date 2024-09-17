@@ -3,16 +3,21 @@
 #include <glad/glad.h>
 #include <functional>
 #include <utility>
+#include <memory>
 
 #include "error_handling.hpp"
 
-class OpenGLResource {
+/// <summary>
+/// Fufills the same objective as original OpenGLRecource
+/// Contains an IDs of Loaded Open GL recources to locate them within the OpenGL library
+/// </summary>
+class Resource {
 public:
-	OpenGLResource()
+	Resource()
 		: mId(0)
 	{}
 
-	OpenGLResource(
+	Resource(
 		std::function<GLuint()> aCreateFunc,
 		std::function<void(GLuint)> aDeleteFunc)
 		: mCreateFunc(aCreateFunc)
@@ -21,29 +26,24 @@ public:
 		mId = mCreateFunc();
 	}
 
-	~OpenGLResource() {
+	~Resource() {
 		if (mDeleteFunc) {
 			mDeleteFunc(mId);
 		}
 	}
 
 	// Disable copy operations
-	//OpenGLResource(const OpenGLResource&) = delete;
-	OpenGLResource(const OpenGLResource& orig) {
-		mId = orig.mId;
-		//mDeleteFunc = [](GLuint) {};
-	}
-
-	OpenGLResource& operator=(const OpenGLResource&) = delete;
+	Resource(const Resource&) = delete;
+	Resource& operator=(const Resource&) = delete;
 
 	// Enable move operations
-	OpenGLResource(OpenGLResource&& other) noexcept
+	Resource(Resource&& other) noexcept
 		: mId(std::exchange(other.mId, 0))
 		, mCreateFunc(std::move(other.mCreateFunc))
 		, mDeleteFunc(std::move(other.mDeleteFunc))
 	{}
 
-	OpenGLResource& operator=(OpenGLResource&& other) noexcept {
+	Resource& operator=(Resource&& other) noexcept {
 		if (this != &other) {
 			if (mDeleteFunc) {
 				mDeleteFunc(mId);
@@ -56,12 +56,58 @@ public:
 	}
 
 	GLuint get() const { return mId; }
-
 private:
 	GLuint mId = 0; // OpenGL resource ID
 	std::function<GLuint(void)> mCreateFunc;
 	std::function<void(GLuint)> mDeleteFunc;
 };
+
+/// <summary>
+/// Wraps Resource within copy and move capable object
+/// </summary>
+class OpenGLResource {
+public:
+	OpenGLResource()
+		: resource(std::make_shared<Resource>(Resource()))
+	{}
+
+	OpenGLResource(
+		std::function<GLuint()> aCreateFunc,
+		std::function<void(GLuint)> aDeleteFunc) : 
+		resource( std::make_shared<Resource>(Resource(aCreateFunc, aDeleteFunc)))
+	{}
+
+	~OpenGLResource() = default;
+
+	// Enabled copy operations
+	OpenGLResource(const OpenGLResource& orig) : resource(orig.resource)
+	{}
+
+	OpenGLResource& operator=(const OpenGLResource& other) {
+		if (this != &other) {
+			resource = other.resource;
+		}
+		return *this;
+	}
+
+	// Enable move operations
+	OpenGLResource(OpenGLResource&& other) noexcept
+		: resource(std::move(other.resource))
+	{}
+
+	OpenGLResource& operator=(OpenGLResource&& other) noexcept {
+		if (this != &other) {
+			this->resource = std::move(other.resource);
+		}
+		return *this;
+	}
+
+	GLuint get() const { return resource->get(); }
+
+private:
+	std::shared_ptr<Resource> resource;
+};
+
 
 inline OpenGLResource createVertexArray() {
 	return OpenGLResource(

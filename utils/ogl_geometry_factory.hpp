@@ -14,21 +14,16 @@ namespace fs = std::filesystem;
 
 class OGLGeometry: public AGeometry {
 public:
-
-
 	OGLGeometry(IndexedBuffer buff):
 		buffer(std::move(buff)), currentTFBO_ptr(std::make_shared<unsigned int>(0))
 	{
 	}
 
-	// problém je tady není definovaný copy construktor
-	// problem is there is no OpenGLResource copy constructor? or it is that there is automatic OGLGeometry copy constructor
-
 	IndexedBuffer buffer;
 	std::shared_ptr<unsigned int> currentTFBO_ptr;
 
-
 	void bind() const{
+		std::cout << "buffer binding" << std::endl;
 		if (buffer.isTransformFeedbackLoopEnabled) {
 			int previusTFBO = (*currentTFBO_ptr + 1) % 2;
 

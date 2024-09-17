@@ -111,12 +111,16 @@ int main() {
 		OGLGeometryFactory geometryFactory;
 
 
+		std::cout << "Scene creation initiated" << std::endl;
+
 		std::array<SimpleScene, 4> scenes{
 			createCubeScene(materialFactory, geometryFactory),
 			createInstancedCubesScene(materialFactory, geometryFactory),
 			createMonkeyScene(materialFactory, geometryFactory),
 			createInstancedParticleSystemScene(materialFactory, geometryFactory),
 		};
+		std::cout << "Scene creation ended" << std::endl;
+		std::cout.flush();
 
 		Renderer renderer(materialFactory);
 

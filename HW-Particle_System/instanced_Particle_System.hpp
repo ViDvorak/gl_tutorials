@@ -17,10 +17,10 @@ Recommended approach:
 
 
 inline IndexedBuffer generateInstancedParticleSystemBuffers(const std::vector<VertexVelocityInitLife>& aPositionColorAttribs, unsigned int aParticleCount, OpenGLResource&& tfb) {
-	IndexedBuffer buffers{
-		{createVertexArray(), createVertexArray()},
-		{createBuffer(), createBuffer()}
-	};
+	IndexedBuffer buffers(
+		{ createVertexArray(), createVertexArray() },
+		{ createBuffer(), createBuffer() }
+	);
 	buffers.vbos.push_back(createBuffer());
 
 	buffers.isTransformFeedbackLoopEnabled = true;
@@ -49,8 +49,11 @@ inline IndexedBuffer generateInstancedParticleSystemBuffers(const std::vector<Ve
 	// }
 
 
+	std::cout << "buffers size: " << buffers.vaos.size() << std::endl;
+	std::cout.flush();
+
 	for (int i = 0; i < 2; ++i) {
-		// bind VAO 
+		// bind VAO
 		GL_CHECK(glBindVertexArray(buffers.vaos[i].get()));
 
 		// bind VBO with vertex data

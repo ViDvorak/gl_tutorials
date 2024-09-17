@@ -16,13 +16,17 @@ using VBOVector = std::vector<OpenGLResource>;
 
 struct IndexedBuffer {
 public:
+	IndexedBuffer(std::vector<OpenGLResource>&& aVAOs, std::vector<OpenGLResource>&& aTFBOs)
+		: vaos(std::move(aVAOs)), tfbos(std::move(aTFBOs))
+	{}
+
+	IndexedBuffer( const std::vector<OpenGLResource>&& aVAOs) 
+		: vaos(std::move(aVAOs))
+	{}
+
 	std::vector<OpenGLResource> vaos; // setup for transform feedback
 	std::vector<OpenGLResource> tfbos; // feedback buffers to switch between
 
-	// transform feedback object and i do not need it
-	// i need two standard VBOs connnected to separate VAOs to be switched in between
-	// TODO make shadered be in special order and so thay can use the same VAOs and VBOs
-	// TODO if the shaders are executed alwais in the same order then the order specification may not be required
 	std::vector<OpenGLResource> vbos;
 	unsigned int indexCount = 0;
 	unsigned int instanceCount = 0;

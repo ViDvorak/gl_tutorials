@@ -32,6 +32,9 @@ inline IndexedBuffer generateInstancedCubeBuffers(const std::vector<VertexColor>
 		}
 	}
 
+	std::cout << "cube vaos buffer size: " << buffers.vaos.size() << std::endl;
+	std::cout.flush();
+
 	GL_CHECK(glBindVertexArray(buffers.vaos[0].get()));
 
 	GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, buffers.vbos[0].get()));
