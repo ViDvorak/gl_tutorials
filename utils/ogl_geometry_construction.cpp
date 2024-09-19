@@ -262,6 +262,7 @@ generateCubeBuffersNormTex() {
 
 	// Unbind VAO
 	GL_CHECK(glBindVertexArray(0));
+	GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, 0));
 
 	buffers.indexCount = unsigned(indices.size());
 	buffers.mode = GL_TRIANGLES;

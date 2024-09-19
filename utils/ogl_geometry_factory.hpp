@@ -28,11 +28,12 @@ public:
 			int previusTFBO = (*currentTFBO_ptr + 1) % 2;
 
 			GL_CHECK(glBindVertexArray(buffer.vaos[previusTFBO].get()));
-			GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, buffer.vbos[previusTFBO].get()));
-			GL_CHECK(glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, buffer.vbos[*currentTFBO_ptr].get()));
+			// GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, buffer.tfbos[previusTFBO].get())); // it is already bound by VAO
+			GL_CHECK(glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, buffer.tfbos[*currentTFBO_ptr].get()));
 
 			*currentTFBO_ptr = previusTFBO;
 		}
+
 		else {
 			GL_CHECK(glBindVertexArray(buffer.vaos[0].get()));
 		}
@@ -44,7 +45,7 @@ public:
 
 	void draw(GLenum aMode) const {
 		if (buffer.isTransformFeedbackLoopEnabled) {
-			std::cout << "-----" << std::endl << "draw mode " << aMode << std::endl;
+			std::cout << "-----" << std::endl << "draw mode " << aMode << std::endl; // it does not reach here
 			GL_CHECK(glBeginTransformFeedback(aMode));
 		}
 
