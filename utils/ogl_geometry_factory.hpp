@@ -15,23 +15,23 @@ namespace fs = std::filesystem;
 class OGLGeometry: public AGeometry {
 public:
 	OGLGeometry(IndexedBuffer buff):
-		buffer(std::move(buff)), currentTFBO_ptr(std::make_shared<unsigned int>(0))
+		buffer(std::move(buff)), currentTFBOidx_ptr(std::make_unique<unsigned int>(0))
 	{
 	}
 
 	IndexedBuffer buffer;
-	std::shared_ptr<unsigned int> currentTFBO_ptr;
+	std::unique_ptr<unsigned int> currentTFBOidx_ptr;
 
 	void bind() const{
 		std::cout << "buffer binding" << std::endl;
 		if (buffer.isTransformFeedbackLoopEnabled) {
-			int previusTFBO = (*currentTFBO_ptr + 1) % 2;
+			int previusTFBO = (*currentTFBOidx_ptr + 1) % 2;
 
 			GL_CHECK(glBindVertexArray(buffer.vaos[previusTFBO].get()));
 			// GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, buffer.tfbos[previusTFBO].get())); // it is already bound by VAO
-			GL_CHECK(glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, buffer.tfbos[*currentTFBO_ptr].get()));
+			GL_CHECK(glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, buffer.tfbos[*currentTFBOidx_ptr].get()));
 
-			*currentTFBO_ptr = previusTFBO;
+			*currentTFBOidx_ptr = previusTFBO;
 		}
 
 		else {
@@ -46,7 +46,7 @@ public:
 	void draw(GLenum aMode) const {
 		if (buffer.isTransformFeedbackLoopEnabled) {
 			std::cout << "-----" << std::endl << "draw mode " << aMode << std::endl; // it does not reach here
-			GL_CHECK(glBeginTransformFeedback(aMode));
+			GL_CHECK(glBeginTransformFeedback(GL_TRIANGLES));
 		}
 
 		if (buffer.instanceCount == 0) {
@@ -64,7 +64,7 @@ public:
 			GL_CHECK(glEndTransformFeedback());
 			// TODO switch base buffer to newly populated one
 			// is there a need to use vbos for the switch?
-			int previusTFBO = (*currentTFBO_ptr + 1) % 2;
+			int previusTFBO = (*currentTFBOidx_ptr + 1) % 2;
 
 			//auto glGeometry = (const_cast<OGLGeometry*> (this));
 			

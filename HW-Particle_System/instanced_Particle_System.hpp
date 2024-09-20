@@ -14,8 +14,93 @@ Recommended approach:
     Use instancing for particles, or just buffer of vertices rendered as GL_POINTS and generate the particles in a geometry shader
     Use pregenerated 3D texture for particle animation, or use example 07_noise to generate the texture procedurally.
 */
+inline IndexedBuffer generateInstancedParticleSystemBuffers(const std::vector<VertexVelocityInitLife>& aPositionColorAttribs, unsigned int aParticleCount, OpenGLResource&& tfb) {
+	IndexedBuffer buffers{
+		{createVertexArray(),createVertexArray()},
+		{createBuffer(), createBuffer()}
+	};
+
+	buffers.vbos.push_back(createBuffer());
+	buffers.vbos.push_back(createBuffer());
+	//buffers.vbos.push_back(createBuffer());
+
+	std::vector<VertexNormTex> vertices;
+	std::vector<unsigned int> indices;
+
+	// Generate vertex data
+	for (int i = 0; i < 3; ++i) {
+		for (int direction = -1; direction < 2; direction += 2) {
+			unsigned indexOffset = unsigned(vertices.size());
+			for (int j = 0; j < 4; ++j) {
+				vertices.push_back(VertexNormTex(
+					insertDimension(unitFaceVertices[j], i, direction * 0.5f), // position
+					insertDimension(glm::vec2(), i, float(direction)), // normal
+					unitFaceVertices[j] + glm::vec2(0.5f, 0.5f))); // texture coordinates
+			}
+		}
+	}
+
+	// Generate indices for EBO
+	unsigned int index = 0;
+	for (auto& vertex : vertices) {
+		indices.push_back(index++);
+	}
+
+	for (int i = 0; i < 2; ++i) {
+		// Bind VAO 
+		GL_CHECK(glBindVertexArray(buffers.vaos[i].get()));
+
+		// Bind VBO with vertex data
+		GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, buffers.tfbos[i].get()));
+		GL_CHECK(glBufferData(GL_ARRAY_BUFFER, sizeof(VertexNormTex) * vertices.size(), vertices.data(), GL_STATIC_DRAW));
+
+		// Bind EBO
+		GL_CHECK(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers.vbos[0].get()));
+		GL_CHECK(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * indices.size(), indices.data(), GL_STATIC_DRAW));
+
+		// Vertex attributes
+		// Position attribute
+		GL_CHECK(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexNormTex), (void*)0));
+		GL_CHECK(glEnableVertexAttribArray(0));
+
+		// Normal attribute
+		GL_CHECK(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexNormTex), (void*)(sizeof(glm::vec3))));
+		GL_CHECK(glEnableVertexAttribArray(1));
+
+		// Texture coordinate attribute
+		GL_CHECK(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(VertexNormTex), (void*)(2 * sizeof(glm::vec3))));
+		GL_CHECK(glEnableVertexAttribArray(2));
 
 
+
+		// Instance attributes
+		GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, buffers.vbos[1].get()));
+		GL_CHECK(glBufferData(GL_ARRAY_BUFFER, sizeof(VertexColor) * aPositionColorAttribs.size(), aPositionColorAttribs.data(), GL_STATIC_DRAW));
+
+		// Instance position attribute
+		GL_CHECK(glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(VertexColor), (void*)(0)));
+		GL_CHECK(glEnableVertexAttribArray(3));
+		GL_CHECK(glVertexAttribDivisor(3, 1));
+
+		// Instance color attribute
+		GL_CHECK(glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(VertexColor), (void*)(sizeof(glm::vec3))));
+		GL_CHECK(glEnableVertexAttribArray(4));
+		GL_CHECK(glVertexAttribDivisor(4, 1));
+
+		// Unbind VAO
+		GL_CHECK(glBindVertexArray(0));
+	}
+
+	buffers.indexCount = unsigned(indices.size());
+	buffers.instanceCount = unsigned(aPositionColorAttribs.size());
+	buffers.mode = GL_POINTS;
+	buffers.isTransformFeedbackLoopEnabled = true;
+
+
+	return buffers;
+}
+
+/*
 inline IndexedBuffer generateInstancedParticleSystemBuffers(const std::vector<VertexVelocityInitLife>& aPositionColorAttribs, unsigned int aParticleCount, OpenGLResource&& tfb) {
 	IndexedBuffer buffers(
 		{ createVertexArray(), createVertexArray() },
@@ -129,7 +214,7 @@ inline IndexedBuffer generateInstancedParticleSystemBuffers(const std::vector<Ve
 	buffers.mode = GL_POINTS;
 	return buffers;
 }
-
+*/
 
 class InstancedParticleSystem : public MeshObject {
 public:
