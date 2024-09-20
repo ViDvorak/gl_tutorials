@@ -52,7 +52,12 @@ public:
 		if (buffer.instanceCount == 0) {
 			GL_CHECK(glDrawElements(aMode, buffer.indexCount, GL_UNSIGNED_INT, reinterpret_cast<void*>(0)));
 		} else {
-			GL_CHECK(glDrawElementsInstanced(aMode, buffer.indexCount, GL_UNSIGNED_INT, reinterpret_cast<void*>(0), buffer.instanceCount));
+			// OpenGL error:
+			// glDrawElementsInstanced(aMode, buffer.indexCount, GL_UNSIGNED_INT, reinterpret_cast<void*>(0), buffer.instanceCount):
+			// INVALID_OPERATION
+
+			// GL_CHECK(glDrawArraysInstanced(GL_POINTS, 0, buffer.indexCount, buffer.instanceCount));
+			GL_CHECK(glDrawElementsInstanced(aMode, buffer.indexCount, GL_UNSIGNED_INT, reinterpret_cast<void*>(0), buffer.instanceCount)); // requires EBO
 		}
 
 		if (buffer.isTransformFeedbackLoopEnabled) {

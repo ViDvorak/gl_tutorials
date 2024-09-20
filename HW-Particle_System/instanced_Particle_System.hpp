@@ -22,17 +22,14 @@ inline IndexedBuffer generateInstancedParticleSystemBuffers(const std::vector<Ve
 		{ createBuffer(), createBuffer() }
 	);
 	buffers.vbos.push_back(createBuffer());
+	buffers.vbos.push_back(createBuffer());
+	buffers.vbos.push_back(createBuffer());
 
 	buffers.isTransformFeedbackLoopEnabled = true;
 
 
 	std::vector<VertexVelocityLife> vertices;
-	// std::vector<unsigned int> indices;
-
-	// TODO insted of vertices pass to the VBO only centers of the particles
-	// TODO in vertex shader move particles in direction of theier velocity potencialy with some randomization and lower the velocity
-	// TODO in geometry shader create vertises plane where normal looks at camera
-	// TODO fragment shader use particle 
+	std::vector<GLuint> indices;
 
 	
 	for (VertexVelocityInitLife vertex : aPositionColorAttribs) {
@@ -44,9 +41,10 @@ inline IndexedBuffer generateInstancedParticleSystemBuffers(const std::vector<Ve
 	}
 
 	// new EBO data definition
-	// for (unsigned int i = 0; i < aParticleCount; ++i) {
-	// 	 indices.push_back(i);
-	// }
+	//for (unsigned int i = 0; i < aParticleCount; ++i) {
+	//	 indices.push_back(i);
+	//}
+	indices.push_back(0);
 
 
 	std::cout << "buffers size: " << buffers.vaos.size() << std::endl;
@@ -61,8 +59,8 @@ inline IndexedBuffer generateInstancedParticleSystemBuffers(const std::vector<Ve
 		GL_CHECK(glBufferData(GL_ARRAY_BUFFER, sizeof(VertexVelocityLife) * vertices.size(), vertices.data(), GL_STATIC_DRAW));
 
 		// bind EBO
-		//GL_CHECK(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers.vbos[1].get()));
-		//GL_CHECK(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * indices.size(), indices.data(), GL_STATIC_DRAW));
+		GL_CHECK(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers.vbos[i].get()));
+		GL_CHECK(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * indices.size(), indices.data(), GL_STATIC_DRAW));
 
 
 
@@ -70,17 +68,17 @@ inline IndexedBuffer generateInstancedParticleSystemBuffers(const std::vector<Ve
 		// current position
 		GL_CHECK(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexVelocityLife) * 4, (void*)0));
 		GL_CHECK(glEnableVertexAttribArray(0));
-		//GL_CHECK(glVertexAttribDivisor(0, 1));
+		GL_CHECK(glVertexAttribDivisor(0, 1));
 
 		// current velocity
 		GL_CHECK(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexVelocityLife) * 4, (void*)(sizeof(glm::vec3))));
 		GL_CHECK(glEnableVertexAttribArray(1));
-		//GL_CHECK(glVertexAttribDivisor(1, 1));
+		GL_CHECK(glVertexAttribDivisor(1, 1));
 	
 		// elapsed timeOfLife of the particel
 		GL_CHECK(glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(VertexVelocityLife) * 4, (void*)(2 * sizeof(glm::vec3)))); // last parameter is offset
 		GL_CHECK(glEnableVertexAttribArray(2));
-		//GL_CHECK(glVertexAttribDivisor(2, 1));
+		GL_CHECK(glVertexAttribDivisor(2, 1));
 
 
 
@@ -89,28 +87,28 @@ inline IndexedBuffer generateInstancedParticleSystemBuffers(const std::vector<Ve
 		// position and color of each particle
 
 		// Bind VBO
-		GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, buffers.vbos[0].get()));
+		GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, buffers.vbos[2].get()));
 		GL_CHECK(glBufferData(GL_ARRAY_BUFFER, sizeof(VertexVelocityInitLife) * aPositionColorAttribs.size(), aPositionColorAttribs.data(), GL_STATIC_DRAW));
 
 		// initial position
 		GL_CHECK(glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(VertexVelocityInitLife), (void*)(0)));
 		GL_CHECK(glEnableVertexAttribArray(3));
-		//GL_CHECK(glVertexAttribDivisor(3, 1));
+		GL_CHECK(glVertexAttribDivisor(3, 1));
 
 		// initial velocity
 		GL_CHECK(glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(VertexVelocityInitLife), (void*)(sizeof(glm::vec3))));
 		GL_CHECK(glEnableVertexAttribArray(4));
-		//GL_CHECK(glVertexAttribDivisor(4, 1));
+		GL_CHECK(glVertexAttribDivisor(4, 1));
 
 		// time of a particle life
 		GL_CHECK(glVertexAttribPointer(5, 1, GL_FLOAT, GL_FALSE, sizeof(VertexVelocityInitLife), (void*)(2 * sizeof(glm::vec3))));
 		GL_CHECK(glEnableVertexAttribArray(5));
-		//GL_CHECK(glVertexAttribDivisor(5, 1));
+		GL_CHECK(glVertexAttribDivisor(5, 1));
 
 		// initial lifeDelay
 		GL_CHECK(glVertexAttribPointer(6, 1, GL_FLOAT, GL_FALSE, sizeof(VertexVelocityInitLife), (void*)(2 * (sizeof(glm::vec3) + sizeof(float) )) ));
 		GL_CHECK(glEnableVertexAttribArray(6));
-		//GL_CHECK(glVertexAttribDivisor(6, 1));
+		GL_CHECK(glVertexAttribDivisor(6, 1));
 
 		// Unbind VAO
 		GL_CHECK(glBindVertexArray(0));
@@ -126,8 +124,8 @@ inline IndexedBuffer generateInstancedParticleSystemBuffers(const std::vector<Ve
 
 
 
-	buffers.indexCount = unsigned(aParticleCount);
-	buffers.instanceCount = unsigned(aPositionColorAttribs.size());
+	buffers.indexCount = unsigned(1);
+	buffers.instanceCount = unsigned(aParticleCount);
 	buffers.mode = GL_POINTS;
 	return buffers;
 }
